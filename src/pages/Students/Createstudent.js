@@ -1,7 +1,59 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Form, Table } from "react-bootstrap";
 
 const Createstudent = () => {
+  const [commingStudent, setCommingStudent] = useState([]);
+
+  useEffect(() => {
+    fetch(`http://localhost:1337/api/students `, {
+      method: "GET",
+    })
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        console.log(data.data);
+        let commingdata = data.data.map((cv, idx, arr) => {
+          return {
+            id: cv.id,
+            name: cv.attributes.name,
+          };
+        });
+        setCommingStudent(commingdata);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
+
+  const deleteStd = (e) => {
+    console.log(
+      e.target.closest("tr").querySelector("td:first-child").innerHTML
+    );
+    const confirmation = window.confirm("do you really want to delete");
+    const sID = e.target
+      .closest("tr")
+      .querySelector("td:first-child").innerHTML;
+
+    if (confirmation === true) {
+      fetch(` http://localhost:1337/api/students/${sID} `, { method: "DELETE" })
+        .then((res) => {
+          return res.json();
+        })
+        .then((data) => {
+          console.log(data);
+        })
+        .catch((err) => {
+          console.log("data");
+          alert("student deleted successfully");
+          e.target.closest("tr").remove();
+        });
+    } else {
+      alert("you can delete you need admin access to delete ");
+    }
+  };
+
+  ///////////////////////yuh he chalte chalte sath chut jyange khabi to milo  na /////////////
   return (
     <div className="container mt-5">
       <h1 className="text-center">create student</h1>
@@ -47,15 +99,26 @@ const Createstudent = () => {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>Mark</td>
-            <td>
-              <button className=" btn btn-success">view</button>
-              <button className=" btn ">update</button>
-              <button className=" btn btn-danger">delete</button>
-            </td>
-          </tr>
+          {commingStudent.map((cv, idx, arr) => {
+            return (
+              <tr>
+                <td>{cv.id}</td>
+                <td>{cv.name}</td>
+                <td>
+                  <button className=" btn btn-success">view</button>
+                  <button className=" btn ">update</button>
+                  <button
+                    className=" btn btn-danger"
+                    onClick={(e) => {
+                      deleteStd(e);
+                    }}
+                  >
+                    delete
+                  </button>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </Table>
     </div>
